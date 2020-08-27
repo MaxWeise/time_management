@@ -1,0 +1,15 @@
+1. Greetingmessage, License information
+
+2. Give input
+	a. Create new Task, 		return 2
+	b. Work on existing Task, 	return 2
+	c. Delete existing Task,	return 2
+	d. Give overview of all
+	   tasks/todo-list			return 2
+	e. Finish project 			goto 3
+
+3. If project is finished:
+	+ Show overview of total spent time
+	+ Check for open tasks that have to be completed first
+
+4. Exit Program
