@@ -50,7 +50,7 @@ class Task(object):
 
     def toDict(self):
         '''Returns the object as a dictionary'''
-        list_of_keys = ['name', 'module', 'time', 'priority', 'work in progress']
+        list_of_keys = ['name', 'module', 'time', 'priority', 'work_in_progress']
         list_of_values = [self.name, self.module, self.time, self.priority, self.wip]
 
         taskDict = dict(zip(list_of_keys, list_of_values))

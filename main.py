@@ -7,6 +7,8 @@ Created on 04.08.2020
 from task import Task
 import CustomExceptions as cExcept
 import json
+# import os
+from glob import iglob # Used to acces files by extension (in this case '.json')
 
 # NOTE: TkInter or HTML with Python backend (Django / Flask)
 
@@ -20,24 +22,17 @@ def searchName(LIST, name):  # May not be useful, but good to have
     return False
 
 
-# TODO: JSON savestates of the tasks
-# TODO: write jobj to file and get jobj from file
-def createNewTask_fromJSON(LIST):
-    JObject = '{ "name":"TASK1", "modul":"p", "time":60, "WIP":false, "priority":0}'
+def createNewTask_fromJSON(LIST, JObject):
+    '''Recreates all Task objects from .json file
+    JObject gets passed as jsonlist, converted to list, when iterated, all tasks get created and appendet to LIST
     
-    j_dict = json.loads(JObject)
+    @author: Max Weise
+    '''
+    json_list = json.load(JObject)
     
-    t = Task(j_dict['name'], j_dict['modul'], j_dict['priority'], j_dict['time'], j_dict['WIP'])
-    LIST.append(t)
-
-
-def createJSONObject(task_object):
-    x = task_object.toDict()
-    
-    jobj = json.dumps(x)
-    
-    return jobj
-    pass
+    for json_object in json_list:
+        t = Task(**json_object) # The values of all the keywords get passed to the Task definition
+        LIST.append(t)
 
 
 def createNewTask(LIST):
@@ -108,23 +103,29 @@ def work_on_task(LIST):
 
 
 def test():
-    liste = []
-    createNewTask_fromJSON(liste)
-    
-    printToDoList(liste)
-
-    print(createJSONObject(liste[0]))
+    pass
 
 
 def main():
-    # TODO: JSON load here
     
+    # Declaration of necessary instances (List of commands, to do list)
     command_List = {
         'new' : createNewTask,
         'delete' : deleteTask,
         'work' : work_on_task,
-        }
-    to_do_list = []  # List of all the task objects
+        }    
+    to_do_list = []  # List where all tasks get saved
+    
+    # Try loading all the Tasks from JSON file
+    try:
+        for save_file in iglob('*.json', recursive = True):
+            with open(save_file) as json_file:
+                createNewTask_fromJSON(to_do_list, json_file)
+    except Exception as e: # Task wont be lost if exception occurs
+        print(e)
+    
+
+# ======================================================================================
 
     while True:  # This is where the program actually runs
         try:
@@ -144,11 +145,17 @@ def main():
             print(e.message)
             print('please try again\n')
 
-    # TODO: write JSONObjects to file here
+# ======================================================================================
+
+    # TODO: How to include realtive path in python? | Suggestion: os.somethinsomethin
+
+    # All tasks will be written in JSON file
+    with open('saved_objects.json', 'w+') as f:
+        json.dump([task_object.toDict() for task_object in to_do_list], f)
     
     print('END')
 
 
 if __name__ == '__main__':
-    # main()
-    test()
+    main()
+    # test()
