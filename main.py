@@ -5,12 +5,15 @@ Created on 04.08.2020
 '''
 
 from task import Task
+from datetime import timedelta  # Convert seconds to format h:mm:ss
 import CustomExceptions as cExcept
 import json
+
 # import os
-from glob import iglob # Used to acces files by extension (in this case '.json')
+# from glob import iglob # Used to acces files by extension (in this case '.json')
 
 # NOTE: TkInter or HTML with Python backend (Django / Flask)
+# NOTE: 'end' command -> end the project, give overview of total time spent, clean up all projectfiles, maybe print pdf
 
 
 def searchName(LIST, name):  # May not be useful, but good to have
@@ -85,7 +88,7 @@ def deleteTask(LIST):
     raise cExcept.NotFoundException
 
 
-def work_on_task(LIST):
+def work_on_task(LIST, t):
     '''Selects task and starts the stopwatch'''
 
     if LIST == []:
@@ -96,7 +99,8 @@ def work_on_task(LIST):
 
     for x in LIST:
         if x.name == user_selection:
-            x.stoppwatch()
+            time = x.stoppwatch()
+            t += time
             return
 
     raise cExcept.NotFoundException
@@ -105,10 +109,9 @@ def work_on_task(LIST):
 def test():
     pass
 
-
 def main():
-    
-    # Declaration of necessary instances (List of commands, to do list)
+    # TODO: Counter of total time spent in this project
+    # Declaration of necessary instances (List of commands, to do list, total time spent)
     command_List = {
         'new' : createNewTask,
         'delete' : deleteTask,
@@ -118,17 +121,24 @@ def main():
     
     # Try loading all the Tasks from JSON file
     try:
-        for save_file in iglob('*.json', recursive = True):
-            with open(save_file) as json_file:
-                createNewTask_fromJSON(to_do_list, json_file)
+        with open('saved_objects.json') as json_file:
+            createNewTask_fromJSON(to_do_list, json_file)
     except Exception as e: # Task wont be lost if exception occurs
         print(e)
+        
+    try:
+        with open('time_spent.json') as f:
+            time = json.load(f)
+            total_time = int(time)
+    except Exception as e:
+        print(e)
     
-
 # ======================================================================================
 
     while True:  # This is where the program actually runs
         try:
+            print(f'Total Time : {timedelta(seconds=total_time)}')
+
             if to_do_list != []:
                 print(' ')
                 printToDoList(to_do_list)
@@ -137,13 +147,16 @@ def main():
 
             if userInput == 'exit':
                 break
+            elif userInput == 'work':
+                command_List[userInput](to_do_list, total_time)
             else:
                 command_List[userInput](to_do_list)
+
         except KeyError:
             print(f'The input \'{userInput}\' was invalid, please try again\n')
-        except Exception as e:
-            print(e.message)
-            print('please try again\n')
+#         except Exception as e:
+#             print(e)
+#             print('please try again\n')
 
 # ======================================================================================
 
@@ -152,10 +165,12 @@ def main():
     # All tasks will be written in JSON file
     with open('saved_objects.json', 'w+') as f:
         json.dump([task_object.toDict() for task_object in to_do_list], f)
+        
+    with open('time_spent.json', 'w+') as f:
+        json.dump(total_time, f)
     
     print('END')
 
 
 if __name__ == '__main__':
     main()
-    # test()

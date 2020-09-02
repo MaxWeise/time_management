@@ -95,6 +95,7 @@ class Task(object):
         self.time += delta_t
         print(f'Stopwatch: {timedelta(seconds=delta_t)} | Total: {timedelta(seconds=self.time)}')
 
+        return delta_t
 
 if __name__ == '__main__':
     print('This module is used for declarations only.\nTo run the program, please use the \'main.py\' file')
